@@ -3,7 +3,10 @@ import { FlatList, StyleSheet, Text, View, Image, Pressable } from 'react-native
 import axios from 'axios'
 
 const theCatAPI = axios.create({
-  baseURL: 'https://api.thecatapi.com/v1/images/'
+  baseURL: 'https://api.thecatapi.com/v1/images/',
+  headers:{
+    'x-api-key': process.env.EXPO_PUBLIC_CAT_API_KEY
+  }
 })
 
 export default function App() {
@@ -48,8 +51,8 @@ const styles = StyleSheet.create({
   appTitle: {
     fontSize: 30,
     fontWeight: 'bold',
-    fontFamily: 'Times New Roman',
     marginBottom: 20,
+    textAlign: 'center',
   },
   button: {
     backgroundColor: '#f0f0f0',
