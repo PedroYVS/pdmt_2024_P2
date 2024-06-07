@@ -6,47 +6,34 @@ const theCatAPI = axios.create({
   baseURL: 'https://api.thecatapi.com/v1/images/'
 })
 
-type Foto = {
-  id: number,
-  url: string,
-  width: number,
-  height: number,
-}
-
 export default function App() {
-  const [fotos, setFotos] = useState<Foto[]>([])
-
-  let indexes = 0
+  const [fotos, setFotos] = useState<string[]>([])
 
   const carregaFotos = () => {
     theCatAPI.get('/search?limit=5').then(response => {
-      const fotos: Foto[] = response.data.map((foto: any) => {
-        indexes++
-        return {
-          id: indexes,
-          url: foto.url,
-          width: foto.width,
-          height: foto.height,
-        }
-      })
-      setFotos(colecaoAtual => [...colecaoAtual, ...fotos])
+      const fotos: string[] = response.data.map((foto: any) => foto.url)
+      setFotos(colecaoAtual => [...fotos, ...colecaoAtual])
     })
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.appTitle}>Apresentando Fotos de Gatos</Text>
-      <Pressable onPress={carregaFotos} hitSlop={40}>
+      <Pressable onPress={carregaFotos} style={styles.button} hitSlop={40}>
         <Text>Carregar mais Fotos</Text>
       </Pressable>
-      <FlatList
-      data={fotos}
-      keyExtractor={foto => String(foto.id)}
-      renderItem={foto => {
-        return(
-          <Image source={{uri: foto.item.url}} style={{width: foto.item.width, height: foto.item.height}}/>
-        )
-      }}/>
+      {
+        fotos.length === 0 ? <Text>Pressione o botão para carregar fotos de gatos</Text> :
+        <FlatList
+        data={fotos}
+        keyExtractor={foto => foto}
+        style={styles.presentationBox}
+        renderItem={foto => {
+          return(
+            <Image source={{uri: foto.item}} style={styles.images}/>
+          )
+        }}/>
+      }
     </View>
   );
 }
@@ -59,9 +46,27 @@ const styles = StyleSheet.create({
     marginTop: 50,
   },
   appTitle: {
-    fontSize: 50,
+    fontSize: 30,
     fontWeight: 'bold',
     fontFamily: 'Times New Roman',
     marginBottom: 20,
-  }
+  },
+  button: {
+    backgroundColor: '#f0f0f0',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  presentationBox: {
+    backgroundColor: '#f0f0f0',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  images: {
+    width: 300,
+    height: 300,
+    marginBottom: 20,
+    borderRadius: 10,
+  },
 });
