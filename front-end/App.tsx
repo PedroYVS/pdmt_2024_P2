@@ -32,10 +32,14 @@ export default function App() {
       setFotos(colecaoAtual => [...novasFotos, ...colecaoAtual])
     }
     catch(error: any){
+      console.log(error)
+
       let err: string
 
       if(error.response) err = error.response.data.message
-      if(error.request) err = 'Falha na conexão com o servidor. Tente novamente mais tarde'
+      else if(error.request) err = 'Falha ao se conectar com o servidor. Tente novamente mais tarde.'
+      else err = 'Falha decsonhecida ocorreu. Tente novamente mais tarde.'
+
 
       if(Platform.OS === 'web') window.alert(err!)
       else Alert.alert('Erro', err!, [{ text: 'OK' }])

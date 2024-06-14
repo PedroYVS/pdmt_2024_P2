@@ -20,7 +20,7 @@ server.get('/cats', async (req, res) => {
         })
         res.json(data)
     } catch (error) {
-        res.status(500).json({ error: error.message })
+        res.status(500).json({ message: error.message })
     }
 })
 
