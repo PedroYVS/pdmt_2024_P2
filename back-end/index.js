@@ -7,14 +7,15 @@ const server = express()
 server.use(express.json())
 server.use(cors())
 
-dotenv.config()
-const { PORT, CAT_API_KEY } = process.env
+dotenv.config({ path: '../front-end/.env.development' })
+const PORT = process.env.EXPO_PUBLIC_SERVER_PORT
 
 server.get('/cats', async (req, res) => {
+    const pars = req.query
     try {
-        const { data } = await axios.get(`https://api.thecatapi.com/v1/images/search?limit=${req.query.n_pics}`, {
+        const { data } = await axios.get(`https://api.thecatapi.com/v1/images/search?limit=${pars.n_pics}`, {
             headers: {
-                'x-api-key': CAT_API_KEY
+                'x-api-key': pars.api_key
             }
         })
         res.json(data)

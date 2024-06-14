@@ -3,22 +3,35 @@ import { FlatList, StyleSheet, Text, View, Image, Pressable, Alert, Platform, Ac
 import { Entypo } from '@expo/vector-icons'
 import axios from 'axios'
 
-const theCatAPI = axios.create({
-  baseURL: 'http://localhost:6001',
+const backEndServer = axios.create({
+  baseURL: `http://localhost:${process.env.EXPO_PUBLIC_SERVER_PORT}`
+})
+
+const serverless = axios.create({
+  baseURL: 'https://api.thecatapi.com/v1/images'
 })
 
 export default function App() {
   const [fotos, setFotos] = useState<string[]>([])
   const [pesquisando, setPesquisando] = useState<boolean>(false)
 
-  const carregaFotos = () => {
+  const n_pics = 5
+
+  const api_key = process.env.EXPO_PUBLIC_CAT_API_KEY
+
+  const carregaFotos = async () => {
     setPesquisando(true)
-    theCatAPI.get('/cats', { params: { n_pics: 5 } })
-    .then(response => {
-      const fotos: string[] = response.data.map((foto: any) => foto.url)
-      setFotos(colecaoAtual => [...fotos, ...colecaoAtual])
-    })
-    .catch(error => {
+    let novasFotos: string[]
+    try{
+      if(Platform.OS === 'web'){
+        novasFotos = (await backEndServer.get('/cats', { params: { n_pics, api_key } })).data.map((foto: any) => foto.url)
+      }
+      else{
+        novasFotos = (await serverless.get(`/search?limit=${n_pics}`, { headers: { 'x-api-key': api_key } })).data.map((foto: any) => foto.url)
+      }
+      setFotos(colecaoAtual => [...novasFotos, ...colecaoAtual])
+    }
+    catch(error: any){
       let err: string
 
       if(error.response) err = error.response.data.message
@@ -26,15 +39,17 @@ export default function App() {
 
       if(Platform.OS === 'web') window.alert(err!)
       else Alert.alert('Erro', err!, [{ text: 'OK' }])
-    })
-    .finally(() => setPesquisando(false))
+    }
+    finally{
+      setPesquisando(false)
+    }
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.appTitle}>Apresentando Fotos de Gatos</Text>
       <Pressable onPress={carregaFotos} style={styles.button} hitSlop={40}>
-        <Text style={{ color: styles.button.color, marginRight: 10 }}>Carregar {fotos.length > 0 ? 'mais ' : null}Fotos</Text>
+        <Text style={{ color: styles.button.color, marginRight: 10 }}>Carregar {fotos.length > 0 ? 'mais Fotos' : 'Fotos'}</Text>
         {
           pesquisando ? 
           <ActivityIndicator animating={pesquisando} color={styles.button.color}/> : 
@@ -78,6 +93,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 20,
     flexDirection: 'row',
+    alignItems: 'center',
   },
   presentationBox: {
     backgroundColor: '#f0f0f0',
